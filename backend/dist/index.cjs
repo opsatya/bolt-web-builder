@@ -20,16 +20,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
-const express_1 = __importDefault(require("express"));
 const openai_1 = __importDefault(require("openai"));
-dotenv_1.default.config();
+const express_1 = __importDefault(require("express"));
 const app = (0, express_1.default)();
-const PORT = process.env.PORT || 3000;
-app.use(express_1.default.json());
+dotenv_1.default.config();
 app.get('/', (req, res) => {
     res.json({
-        msg: "Hello from the backend",
-        status: "running"
+        msg: "hello from the backend"
     });
 });
 const openai = new openai_1.default({
@@ -78,18 +75,7 @@ function main() {
         }
     });
 }
-function startServer() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            yield main();
-            app.listen(PORT, () => {
-                console.log(`Server is running on http://localhost:${PORT}`);
-            });
-        }
-        catch (error) {
-            console.error('Failed to start server:', error);
-            process.exit(1);
-        }
-    });
-}
-startServer();
+main();
+app.listen(process.env.port, () => {
+    console.log(`app is running on ${process.env.port}`);
+});

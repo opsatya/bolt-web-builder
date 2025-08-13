@@ -2,6 +2,7 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "dev": "tsc -b && node dist/index.js"
   },
@@ -10,7 +11,9 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@types/express": "^5.0.3",
     "dotenv": "^17.2.1",
+    "express": "^5.1.0",
     "openai": "^5.11.0"
   },
   "devDependencies": {

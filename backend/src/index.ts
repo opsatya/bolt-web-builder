@@ -1,53 +1,65 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+import express, { Request, Response } from 'express';
+import OpenAI from 'openai';
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(express.json());
+
+app.get('/', (req: Request, res: Response) => {
+  res.json({
+    msg: "Hello from the backend",
+    status: "running"
+  });
+});
+const openai = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY,  
+  defaultHeaders: {
+    "HTTP-Referer": "<YOUR_SITE_URL>", // Optional. Site URL for rankings on openrouter.ai.
+    "X-Title": "<YOUR_SITE_NAME>", // Optional. Site title for rankings on openrouter.ai.
+  },
+});
+
 
 async function main() {
-  const response = await fetch('https://api.perplexity.ai/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.PERPLEXITY_API_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'llama-3-sonar-small-32k-chat',
-      stream: true,
-      messages: [
-        {
-          role: 'user',
-          content: "Generate Python code to print prime numbers from 1 to 100" // <--- Clarified prompt
-        }
-      ]
-    })
+  const stream = await openai.chat.completions.create({
+    model: "anthropic/claude-sonnet-4",
+    stream: true,
+    max_tokens: 200,
+    messages: [
+      { 
+        "role": "user",
+        "content": [
+          {
+            "type": "text",
+            "text": "create a simple hello world program in java"
+          }
+        ]
+      }
+    ],
+    
   });
 
-  if (!response.body) {
-    throw new Error('No response body');
+  for await (const chunk of stream) {
+    const content = chunk.choices[0]?.delta?.content || '';
+    process.stdout.write(content);
   }
-
-  const reader = response.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = '';
-
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-
-    // Process each line (SSE format: lines starting with "data: ")
-    let lines = buffer.split('\n');
-    buffer = lines.pop() || '';
-    for (const line of lines) {
-      if (line.startsWith('data: ')) {
-        const jsonStr = line.replace('data: ', '').trim();
-        if (jsonStr === '[DONE]') continue;
-        try {
-          const data = JSON.parse(jsonStr);
-          console.log(data.choices[0].message.content); // Access the content of the message
-        } catch (e) {
-          // Ignore incomplete JSON
-        }
-      }
-    }
+}
+async function startServer() {
+  try {
+    await main();
+    
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
   }
 }
 
-main().catch(console.error);
+startServer();

@@ -1,8 +1,10 @@
-import { MODIFICATIONS_TAG_NAME, WORK_DIR } from './utils/constants';
-import { allowedHTMLElements } from './utils/markdown';
-import { stripIndents } from './utils/stripIndent';
-
-export const getSystemPrompt = (cwd: string = WORK_DIR) => `
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CONTINUE_PROMPT = exports.getSystemPrompt = void 0;
+const constants_1 = require("./utils/constants");
+const markdown_1 = require("./utils/markdown");
+const stripIndent_1 = require("./utils/stripIndent");
+const getSystemPrompt = (cwd = constants_1.WORK_DIR) => `
 You are Bolt, an expert AI assistant and exceptional senior software developer with vast knowledge across multiple programming languages, frameworks, and best practices.
 
 <system_constraints>
@@ -37,11 +39,11 @@ You are Bolt, an expert AI assistant and exceptional senior software developer w
 </code_formatting_info>
 
 <message_formatting_info>
-  You can make the output pretty by using only the following available HTML elements: ${allowedHTMLElements.map((tagName) => `<${tagName}>`).join(', ')}
+  You can make the output pretty by using only the following available HTML elements: ${markdown_1.allowedHTMLElements.map((tagName) => `<${tagName}>`).join(', ')}
 </message_formatting_info>
 
 <diff_spec>
-  For user-made file modifications, a \`<${MODIFICATIONS_TAG_NAME}>\` section will appear at the start of the user message. It will contain either \`<diff>\` or \`<file>\` elements for each modified file:
+  For user-made file modifications, a \`<${constants_1.MODIFICATIONS_TAG_NAME}>\` section will appear at the start of the user message. It will contain either \`<diff>\` or \`<file>\` elements for each modified file:
 
     - \`<diff path="/some/file/path.ext">\`: Contains GNU unified diff format changes
     - \`<file path="/some/file/path.ext">\`: Contains the full new content of the file
@@ -62,7 +64,7 @@ You are Bolt, an expert AI assistant and exceptional senior software developer w
 
   Example:
 
-  <${MODIFICATIONS_TAG_NAME}>
+  <${constants_1.MODIFICATIONS_TAG_NAME}>
     <diff path="/home/project/src/main.js">
       @@ -2,7 +2,10 @@
         return a + b;
@@ -81,7 +83,7 @@ You are Bolt, an expert AI assistant and exceptional senior software developer w
     <file path="/home/project/package.json">
       // full file content here
     </file>
-  </${MODIFICATIONS_TAG_NAME}>
+  </${constants_1.MODIFICATIONS_TAG_NAME}>
 </diff_spec>
 
 <artifact_info>
@@ -277,8 +279,8 @@ Here are some examples of correct usage of artifacts:
   </example>
 </examples>
 `;
-
-export const CONTINUE_PROMPT = stripIndents`
+exports.getSystemPrompt = getSystemPrompt;
+exports.CONTINUE_PROMPT = (0, stripIndent_1.stripIndents) `
   Continue your prior response. IMPORTANT: Immediately begin from where you left off without any interruptions.
   Do not repeat any content, including artifact and action tags.
 `;
